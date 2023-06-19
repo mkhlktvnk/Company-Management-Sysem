@@ -1,10 +1,10 @@
 CREATE TABLE companies
 (
     id                  SERIAL PRIMARY KEY,
-    name                VARCHAR NOT NULL,
-    description         VARCHAR NOT NULL,
-    date_of_creation    DATE    NOT NULL,
-    number_of_employees BIGINT  NOT NULL
+    name                VARCHAR UNIQUE NOT NULL,
+    description         VARCHAR        NOT NULL,
+    date_of_creation    DATE           NOT NULL,
+    number_of_employees BIGINT         NOT NULL
 );
 
 CREATE TABLE departments
