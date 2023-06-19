@@ -2,6 +2,7 @@ package com.digitalchief.companymanagement.unit.service.impl;
 
 import com.digitalchief.companymanagement.builder.impl.CompanyTestBuilder;
 import com.digitalchief.companymanagement.entity.Company;
+import com.digitalchief.companymanagement.message.source.MessagesSource;
 import com.digitalchief.companymanagement.repository.CompanyRepository;
 import com.digitalchief.companymanagement.service.exception.EntityNotFoundException;
 import com.digitalchief.companymanagement.service.exception.EntityNotUniqueException;
@@ -33,6 +34,9 @@ class CompanyServiceImplTest {
 
     @Mock
     private CompanyRepository companyRepository;
+
+    @Mock
+    private MessagesSource messagesSource;
 
     @InjectMocks
     private CompanyServiceImpl companyService;

@@ -4,6 +4,7 @@ import com.digitalchief.companymanagement.builder.impl.CompanyTestBuilder;
 import com.digitalchief.companymanagement.builder.impl.DepartmentTestBuilder;
 import com.digitalchief.companymanagement.entity.Company;
 import com.digitalchief.companymanagement.entity.Department;
+import com.digitalchief.companymanagement.message.source.MessagesSource;
 import com.digitalchief.companymanagement.repository.DepartmentRepository;
 import com.digitalchief.companymanagement.service.CompanyService;
 import com.digitalchief.companymanagement.service.exception.EntityNotFoundException;
@@ -39,6 +40,9 @@ class DepartmentServiceImplTest {
 
     @Mock
     private CompanyService companyService;
+
+    @Mock
+    private MessagesSource messagesSource;
 
     @InjectMocks
     private DepartmentServiceImpl departmentService;
