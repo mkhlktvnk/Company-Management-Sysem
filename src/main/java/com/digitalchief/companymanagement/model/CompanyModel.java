@@ -30,7 +30,4 @@ public class CompanyModel {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @JsonProperty(value = "dateOfCreation")
     private LocalDate dateOfCreation;
-
-    @JsonProperty(value = "numberOfEmployees", access = JsonProperty.Access.READ_ONLY)
-    private Long numberOfEmployees;
 }

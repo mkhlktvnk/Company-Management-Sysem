@@ -64,7 +64,6 @@ class CompanyControllerTest extends BaseIntegrationTest {
                     .withName("Company A")
                     .withDescription("Sample description for Company A")
                     .withDateOfCreation(LocalDate.parse("2020-01-01"))
-                    .withNumberOfEmployees(100L)
                     .build();
             String expectedJson = objectMapper.writeValueAsString(companyModel);
 

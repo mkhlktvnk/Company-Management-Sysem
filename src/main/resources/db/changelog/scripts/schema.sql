@@ -3,8 +3,7 @@ CREATE TABLE companies
     id                  SERIAL PRIMARY KEY,
     name                VARCHAR UNIQUE NOT NULL,
     description         VARCHAR        NOT NULL,
-    date_of_creation    DATE           NOT NULL,
-    number_of_employees BIGINT DEFAULT 0
+    date_of_creation    DATE           NOT NULL
 );
 
 CREATE TABLE departments
@@ -32,3 +31,4 @@ CREATE TABLE employees
 CREATE INDEX idx_company_id ON companies (id);
 CREATE INDEX idx_department_id ON departments (id);
 CREATE INDEX idx_employee_id ON employees (id);
+

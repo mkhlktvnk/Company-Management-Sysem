@@ -18,14 +18,12 @@ public interface CompanyMapper {
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
-            @Mapping(target = "numberOfEmployees", ignore = true),
             @Mapping(target = "departments", ignore = true)
     })
     void copyAllFields(@MappingTarget Company target, Company source);
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
-            @Mapping(target = "numberOfEmployees", ignore = true),
             @Mapping(target = "departments", ignore = true),
     })
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

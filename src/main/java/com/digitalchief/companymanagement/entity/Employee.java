@@ -1,9 +1,7 @@
 package com.digitalchief.companymanagement.entity;
 
-import com.digitalchief.companymanagement.audit.EmployeeAuditListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,7 +21,6 @@ import java.sql.Date;
 @Getter
 @Setter
 @NoArgsConstructor
-@EntityListeners(EmployeeAuditListener.class)
 @Table(name = "employees", indexes = { @Index(name = "idx_employee_id", columnList = "id") })
 public class Employee {
 

@@ -17,7 +17,6 @@ public class CompanyModelTestBuilder implements TestBuilder<CompanyModel> {
     private String name = "";
     private String description = "";
     private LocalDate dateOfCreation = LocalDate.now();
-    private Long numberOfEmployees = 0L;
 
     @Override
     public CompanyModel build() {
@@ -27,7 +26,6 @@ public class CompanyModelTestBuilder implements TestBuilder<CompanyModel> {
         companyModel.setName(name);
         companyModel.setDescription(description);
         companyModel.setDateOfCreation(dateOfCreation);
-        companyModel.setNumberOfEmployees(numberOfEmployees);
 
         return companyModel;
     }

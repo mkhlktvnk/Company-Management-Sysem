@@ -1,15 +1,15 @@
-INSERT INTO companies (name, description, date_of_creation, number_of_employees)
+INSERT INTO companies (name, description, date_of_creation)
 VALUES
-    ('Company A', 'Sample description for Company A', '2020-01-01', 100),
-    ('Company B', 'Sample description for Company B', '2015-05-10', 50),
-    ('Company C', 'Sample description for Company C', '2008-09-15', 200),
-    ('Company D', 'Sample description for Company D', '2012-03-20', 75),
-    ('Company E', 'Sample description for Company E', '2019-11-02', 150),
-    ('Company F', 'Sample description for Company F', '2005-07-08', 300),
-    ('Company G', 'Sample description for Company G', '2018-04-12', 90),
-    ('Company H', 'Sample description for Company H', '2010-06-30', 120),
-    ('Company I', 'Sample description for Company I', '2016-02-25', 80),
-    ('Company J', 'Sample description for Company J', '2017-12-18', 250);
+    ('Company A', 'Sample description for Company A', '2020-01-01'),
+    ('Company B', 'Sample description for Company B', '2015-05-10'),
+    ('Company C', 'Sample description for Company C', '2008-09-15'),
+    ('Company D', 'Sample description for Company D', '2012-03-20'),
+    ('Company E', 'Sample description for Company E', '2019-11-02'),
+    ('Company F', 'Sample description for Company F', '2005-07-08'),
+    ('Company G', 'Sample description for Company G', '2018-04-12'),
+    ('Company H', 'Sample description for Company H', '2010-06-30'),
+    ('Company I', 'Sample description for Company I', '2016-02-25'),
+    ('Company J', 'Sample description for Company J', '2017-12-18');
 
 INSERT INTO departments (name, description, annual_budget, company_id)
 VALUES

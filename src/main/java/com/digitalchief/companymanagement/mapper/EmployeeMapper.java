@@ -31,6 +31,7 @@ public interface EmployeeMapper {
 
     List<EmployeeModel> toModel(List<Employee> entities);
 
+    @Mapping(target = "dateOfEmployment", source = "dateOfEmployment")
     Employee toEntity(EmployeeModel model);
 
     List<Employee> toEntity(List<EmployeeModel> models);

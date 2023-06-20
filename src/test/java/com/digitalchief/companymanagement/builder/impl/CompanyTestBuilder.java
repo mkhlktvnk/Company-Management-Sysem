@@ -26,8 +26,6 @@ public class CompanyTestBuilder implements TestBuilder<Company> {
 
     private Date dateOfCreation = Date.valueOf(LocalDate.now());
 
-    private Long numberOfEmployees = 0L;
-
     private List<Department> departments = new ArrayList<>();
 
     @Override
@@ -38,7 +36,6 @@ public class CompanyTestBuilder implements TestBuilder<Company> {
         company.setName(name);
         company.setDescription(description);
         company.setDateOfCreation(dateOfCreation);
-        company.setNumberOfEmployees(numberOfEmployees);
         company.setDepartments(departments);
 
         return company;
