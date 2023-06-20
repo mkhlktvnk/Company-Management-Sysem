@@ -34,9 +34,7 @@ VALUES ('Research and Development', 'Responsible for product innovation and rese
        ('Design and Creatives', 'Responsible for graphic design and creative content', 700000.00, 12),
        ('Facilities Management', 'Manages maintenance and facility operations', 350000.00, 13),
        ('Training and Development', 'Provides training programs and professional development', 250000.00, 15),
-       ('Risk Management', 'Identifies
-
- and mitigates potential risks', 450000.00, 16),
+       ('Risk Management', 'Identifies and mitigates potential risks', 450000.00, 16),
        ('Quality Assurance', 'Ensures product and service quality', 550000.00, 17),
        ('Business Development', 'Identifies growth opportunities and strategic partnerships', 950000.00, 18),
        ('Project Management', 'Manages project planning and execution', 650000.00, 19),
