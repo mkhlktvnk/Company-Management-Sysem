@@ -50,6 +50,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional
     public Employee createEmployeeInDepartment(Employee employee, Long companyId, Long departmentId) {
         if (!companyRepository.existsById(companyId)) {
             throw new EntityNotFoundException(messages.getMessage(CompanyMessageKey.NOT_FOUND_BY_ID, companyId));
