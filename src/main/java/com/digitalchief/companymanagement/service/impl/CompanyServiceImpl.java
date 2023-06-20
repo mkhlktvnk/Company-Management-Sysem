@@ -57,7 +57,9 @@ public class CompanyServiceImpl implements CompanyService {
             );
         }
         Company companyToUpdate = companyRepository.findById(companyId)
-                .orElseThrow(() -> new EntityNotFoundException(""));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        messagesSource.getMessage(CompanyMessageKey.NOT_FOUND_BY_ID, companyId)
+                ));
         mapper.copyAllFields(companyToUpdate, updateCompany);
         companyRepository.save(companyToUpdate);
     }
@@ -71,7 +73,9 @@ public class CompanyServiceImpl implements CompanyService {
             );
         }
         Company companyToUpdate = companyRepository.findById(companyId)
-                .orElseThrow(() -> new EntityNotFoundException(""));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        messagesSource.getMessage(CompanyMessageKey.NOT_FOUND_BY_ID, companyId)
+                ));
         mapper.copyNotNullFields(companyToUpdate, updateCompany);
         companyRepository.save(companyToUpdate);
     }
