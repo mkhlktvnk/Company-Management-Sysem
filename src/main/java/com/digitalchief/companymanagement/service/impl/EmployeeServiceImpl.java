@@ -43,8 +43,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (!companyRepository.existsById(companyId)) {
             throw new EntityNotUniqueException(messages.getMessage(CompanyMessageKey.NOT_FOUND_BY_ID, companyId));
         }
-
-        // TODO:
         return employeeRepository.findByDepartmentIdAndId(departmentId, employeeId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         messages.getMessage(EmployeeMessageKey.EMPLOYEE_NOT_FOUND_BY_ID, employeeId)
