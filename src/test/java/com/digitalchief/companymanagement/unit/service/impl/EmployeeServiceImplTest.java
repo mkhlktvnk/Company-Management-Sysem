@@ -5,6 +5,7 @@ import com.digitalchief.companymanagement.builder.impl.EmployeeTestBuilder;
 import com.digitalchief.companymanagement.entity.Department;
 import com.digitalchief.companymanagement.entity.Employee;
 import com.digitalchief.companymanagement.message.source.MessagesSource;
+import com.digitalchief.companymanagement.repository.CompanyRepository;
 import com.digitalchief.companymanagement.repository.EmployeeRepository;
 import com.digitalchief.companymanagement.service.DepartmentService;
 import com.digitalchief.companymanagement.service.exception.EntityNotFoundException;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -26,17 +26,22 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceImplTest {
 
-    private static final Long EMPLOYEE_ID = 1L;
-    private static final Long DEPARTMENT_ID = 1L;
+    private static final Long COMPANY_ID = 1L;
+    private static final Long DEPARTMENT_ID = 2L;
+    private static final Long EMPLOYEE_ID = 3L;
+
+    private static final String EMPLOYEE_EMAIL = "employee@example.com";
 
     @Mock
     private EmployeeRepository employeeRepository;
+
+    @Mock
+    private CompanyRepository companyRepository;
 
     @Mock
     private DepartmentService departmentService;
@@ -51,67 +56,105 @@ class EmployeeServiceImplTest {
     class EmployeeServiceImplReadMethodsTest {
 
         @Test
-        void findAllByPageable_shouldReturnExpectedEmployeesAndCallRepository() {
+        void findAllByCompanyAndDepartmentIdWithPagination_shouldReturnExpectedEmployeesAndCallRepository() {
             Pageable pageable = PageRequest.of(0, 3);
             List<Employee> expectedEmployees = List.of(
                     EmployeeTestBuilder.anEmployee().build(),
                     EmployeeTestBuilder.anEmployee().build(),
                     EmployeeTestBuilder.anEmployee().build()
             );
-            doReturn(new PageImpl<>(expectedEmployees)).when(employeeRepository).findAll(pageable);
+            doReturn(expectedEmployees).when(employeeRepository).findAllByDepartmentIdAndId(
+                    COMPANY_ID, DEPARTMENT_ID, pageable
+            );
 
-            List<Employee> actualEmployees = employeeService.findAllByPageable(pageable);
+            List<Employee> actualEmployees = employeeService.findAllByCompanyAndDepartmentIdWithPagination(
+                    COMPANY_ID, DEPARTMENT_ID, pageable
+            );
 
             assertThat(actualEmployees).isEqualTo(expectedEmployees);
-            verify(employeeRepository).findAll(pageable);
+            verify(employeeRepository).findAllByDepartmentIdAndId(COMPANY_ID, DEPARTMENT_ID, pageable);
         }
 
         @Test
-        void findById_shouldReturnExpectedEmployeeAndCallRepository_whenEmployeeIsPresent() {
+        void findByCompanyAndDepartmentAndEmployeeId_shouldReturnExpectedEmployeeAndCallRepository_whenEmployeeIsPresent() {
             Employee expectedEmployee = EmployeeTestBuilder.anEmployee().build();
-            doReturn(Optional.of(expectedEmployee)).when(employeeRepository).findById(EMPLOYEE_ID);
+            doReturn(Optional.of(expectedEmployee)).when(employeeRepository).findByDepartmentIdAndId(
+                    DEPARTMENT_ID, EMPLOYEE_ID
+            );
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
 
-            Employee actualEmployee = employeeService.findById(EMPLOYEE_ID);
+            Employee actualEmployee = employeeService.findByCompanyAndDepartmentAndEmployeeId(
+                    COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID
+            );
 
             assertThat(actualEmployee).isEqualTo(expectedEmployee);
-            verify(employeeRepository).findById(EMPLOYEE_ID);
+            verify(employeeRepository).findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
         }
 
         @Test
-        void findById_shouldThrowEntityNotFoundException_whenEmployeeIsNotPresent() {
-            doReturn(Optional.empty()).when(employeeRepository).findById(EMPLOYEE_ID);
+        void findByCompanyAndDepartmentAndEmployeeId_shouldThrowEntityNotFoundException_whenEmployeeIsNotPresent() {
+            doReturn(Optional.empty()).when(employeeRepository).findByDepartmentIdAndId(
+                    DEPARTMENT_ID, EMPLOYEE_ID
+            );
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
 
-            assertThatThrownBy(() -> employeeService.findById(EMPLOYEE_ID))
-                    .isInstanceOf(EntityNotFoundException.class);
+            assertThatThrownBy(() -> employeeService.findByCompanyAndDepartmentAndEmployeeId(
+                    COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID
+            )).isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        void findByCompanyAndDepartmentAndEmployeeId_shouldThrowEntityNotUniqueException_whenCompanyIsNotPresent() {
+            doReturn(false).when(companyRepository).existsById(COMPANY_ID);
+
+            assertThatThrownBy(() -> employeeService
+                    .findByCompanyAndDepartmentAndEmployeeId(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID))
+                    .isInstanceOf(EntityNotUniqueException.class);
         }
 
     }
 
     @Nested
-    class EmployeeServiceImplCreateMethodsTest {
+    class EmployeeServiceImplCreateMethodsTests {
 
         @Test
-        void createEmployeeInDepartment_shouldReturnExpectedEmployeeAndCallRepository_whenDepartmentIsPresent() {
-            Employee expectedEmployee = EmployeeTestBuilder.anEmployee().build();
-            Department department = DepartmentTestBuilder.aDepartment().build();
-            doReturn(department).when(departmentService).findById(DEPARTMENT_ID);
+        void createEmployeeInDepartment_shouldReturnExpectedEmployee_whenCompanyAndDepartmentArePresentAndEmailIsNotPresent() {
+            Department departmentToCreateEmployeeIn = DepartmentTestBuilder.aDepartment().build();
+            Employee expectedEmployee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(false).when(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+            doReturn(departmentToCreateEmployeeIn).when(departmentService)
+                    .findByCompanyAndDepartmentId(COMPANY_ID, DEPARTMENT_ID);
             doReturn(expectedEmployee).when(employeeRepository).save(expectedEmployee);
 
-            Employee actualEmployee = employeeService.createEmployeeInDepartment(expectedEmployee, DEPARTMENT_ID);
+            Employee actualEmployee = employeeService.createEmployeeInDepartment(
+                    expectedEmployee, COMPANY_ID, DEPARTMENT_ID
+            );
 
             assertThat(actualEmployee).isEqualTo(expectedEmployee);
-            assertThat(actualEmployee.getDepartment()).isEqualTo(department);
-            verify(departmentService).findById(DEPARTMENT_ID);
+            verify(companyRepository).existsById(COMPANY_ID);
+            verify(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+            verify(departmentService).findByCompanyAndDepartmentId(COMPANY_ID, DEPARTMENT_ID);
             verify(employeeRepository).save(expectedEmployee);
         }
 
         @Test
-        void createEmployeeInDepartment_shouldThrowEntityNotFoundException_whenDepartmentIsNotPresent() {
-            Employee employee = EmployeeTestBuilder.anEmployee().build();
-            doThrow(EntityNotFoundException.class).when(departmentService).findById(DEPARTMENT_ID);
+        void createEmployeeInDepartment_shouldThrowEntityNotFoundException_whenCompanyIsNotPresent() {
+            Employee employee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(false).when(companyRepository).existsById(COMPANY_ID);
 
-            assertThatThrownBy(() -> employeeService.createEmployeeInDepartment(employee, DEPARTMENT_ID))
+            assertThatThrownBy(() -> employeeService.createEmployeeInDepartment(employee, COMPANY_ID, DEPARTMENT_ID))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        void createEmployeeInDepartment_shouldThrowEntityNotUniqueException_whenEmailIsNotUnique() {
+            Employee employee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(true).when(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+
+            assertThatThrownBy(() -> employeeService.createEmployeeInDepartment(employee, COMPANY_ID, DEPARTMENT_ID))
+                    .isInstanceOf(EntityNotUniqueException.class);
         }
 
     }
@@ -120,97 +163,147 @@ class EmployeeServiceImplTest {
     class EmployeeServiceImplUpdateMethodsTest {
 
         @Test
-        void updateEmployeeById_shouldCallRepository_whenEmployeeIsPresentAndFieldsAreValid() {
-            Employee updateEmployee = EmployeeTestBuilder.anEmployee().build();
+        void updateEmployeeInDepartmentById_shouldCallRepositories_whenCompanyAndDepartmentAndEmployeeArePresent() {
+            Employee updateEmployee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
             Employee employeeToUpdate = EmployeeTestBuilder.anEmployee().build();
-            doReturn(false).when(employeeRepository).existsByEmail(updateEmployee.getEmail());
-            doReturn(Optional.of(employeeToUpdate)).when(employeeRepository).findById(EMPLOYEE_ID);
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(false).when(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+            doReturn(Optional.of(employeeToUpdate)).when(employeeRepository)
+                    .findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
 
-            employeeService.updateEmployeeById(EMPLOYEE_ID, updateEmployee);
+            employeeService.updateEmployeeInDepartmentById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID, updateEmployee);
 
-            verify(employeeRepository).existsByEmail(updateEmployee.getEmail());
-            verify(employeeRepository).findById(EMPLOYEE_ID);
-            verify(employeeRepository).save(employeeToUpdate);
+            verify(companyRepository).existsById(COMPANY_ID);
+            verify(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+            verify(employeeRepository).findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
         }
 
         @Test
-        void updateEmployeeById_shouldThrowEntityNotUniqueException_whenEmployeeEmailIsNotUnique() {
-            Employee updateEmployee = EmployeeTestBuilder.anEmployee().build();
-            doReturn(true).when(employeeRepository).existsByEmail(updateEmployee.getEmail());
+        void updateEmployeeInDepartmentById_shouldThrowEntityNotFoundException_whenCompanyIsNotPresent() {
+            Employee updateEmployee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(false).when(companyRepository).existsById(COMPANY_ID);
 
-            assertThatThrownBy(() -> employeeService.updateEmployeeById(EMPLOYEE_ID, updateEmployee))
-                    .isInstanceOf(EntityNotUniqueException.class);
-        }
-
-        @Test
-        void updateEmployeeById_shouldThrowEntityNotFoundException_whenEmployeeIsNotPresent() {
-            Employee updateEmployee = EmployeeTestBuilder.anEmployee().build();
-            doReturn(false).when(employeeRepository).existsByEmail(updateEmployee.getEmail());
-            doReturn(Optional.empty()).when(employeeRepository).findById(EMPLOYEE_ID);
-
-            assertThatThrownBy(() -> employeeService.updateEmployeeById(EMPLOYEE_ID, updateEmployee))
+            assertThatThrownBy(() -> employeeService
+                    .updateEmployeeInDepartmentById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID, updateEmployee))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
-        void updateEmployeePartiallyById_shouldCallRepository_whenEmployeeIsPresentAndFieldsAreValid() {
-            Employee updateEmployee = EmployeeTestBuilder.anEmployee().build();
-            Employee employeeToUpdate = EmployeeTestBuilder.anEmployee().build();
-            doReturn(false).when(employeeRepository).existsByEmail(updateEmployee.getEmail());
-            doReturn(Optional.of(employeeToUpdate)).when(employeeRepository).findById(EMPLOYEE_ID);
+        void updateEmployeeInDepartmentById_shouldThrowEntityNotUniqueException_whenEmailIsNotUnique() {
+            Employee updateEmployee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(true).when(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
 
-            employeeService.updateEmployeePartiallyById(EMPLOYEE_ID, updateEmployee);
-
-            verify(employeeRepository).existsByEmail(updateEmployee.getEmail());
-            verify(employeeRepository).findById(EMPLOYEE_ID);
-            verify(employeeRepository).save(employeeToUpdate);
-        }
-
-        @Test
-        void updateEmployeePartiallyById_shouldThrowEntityNotUniqueException_whenEmployeeEmailIsNotUnique() {
-            Employee updateEmployee = EmployeeTestBuilder.anEmployee().build();
-            doReturn(true).when(employeeRepository).existsByEmail(updateEmployee.getEmail());
-
-            assertThatThrownBy(() -> employeeService.updateEmployeePartiallyById(EMPLOYEE_ID, updateEmployee))
+            assertThatThrownBy(() -> employeeService
+                    .updateEmployeeInDepartmentById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID, updateEmployee))
                     .isInstanceOf(EntityNotUniqueException.class);
         }
 
         @Test
-        void updateEmployeePartiallyById_shouldThrowEntityNotFoundException_whenEmployeeIsNotPresent() {
-            Employee updateEmployee = EmployeeTestBuilder.anEmployee().build();
-            doReturn(false).when(employeeRepository).existsByEmail(updateEmployee.getEmail());
-            doReturn(Optional.empty()).when(employeeRepository).findById(EMPLOYEE_ID);
+        void updateEmployeeInDepartmentById_shouldThrowEntityNotFoundException_whenDepartmentIsNotPresent() {
+            Employee updateEmployee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(false).when(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+            doReturn(Optional.empty()).when(employeeRepository)
+                    .findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
 
-            assertThatThrownBy(() -> employeeService.updateEmployeePartiallyById(EMPLOYEE_ID, updateEmployee))
+            assertThatThrownBy(() -> employeeService
+                    .updateEmployeeInDepartmentById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID, updateEmployee))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
+        @Test
+        void updateEmployeeInDepartmentPartiallyById_shouldCallRepositories_whenCompanyAndDepartmentArePresent() {
+            Employee updateEmployee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            Employee employeeToUpdate = EmployeeTestBuilder.anEmployee().build();
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(false).when(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+            doReturn(Optional.of(updateEmployee)).when(employeeRepository)
+                    .findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
+
+            employeeService.updateEmployeeInDepartmentPartiallyById(
+                    COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID, updateEmployee
+            );
+
+            verify(companyRepository).existsById(COMPANY_ID);
+            verify(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+            verify(employeeRepository).findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
+        }
+
+        @Test
+        void updateEmployeeInDepartmentPartiallyById_shouldThrowEntityNotFoundException_whenCompanyIsNotPresent() {
+            Employee updateEmployee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(false).when(companyRepository).existsById(COMPANY_ID);
+
+            assertThatThrownBy(() -> employeeService
+                    .updateEmployeeInDepartmentPartiallyById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID, updateEmployee))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        void updateEmployeeInDepartmentPartiallyById_shouldThrowEntityNotUniqueException_whenEmailIsNotUnique() {
+            Employee updateEmployee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(true).when(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+
+            assertThatThrownBy(() -> employeeService
+                    .updateEmployeeInDepartmentPartiallyById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID, updateEmployee))
+                    .isInstanceOf(EntityNotUniqueException.class);
+        }
+
+        @Test
+        void updateEmployeeInDepartmentPartiallyById_shouldThrowEntityNotFoundException_whenDepartmentIsNotPresent() {
+            Employee updateEmployee = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(false).when(employeeRepository).existsByEmail(EMPLOYEE_EMAIL);
+            doReturn(Optional.empty()).when(employeeRepository)
+                    .findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
+
+            assertThatThrownBy(() -> employeeService
+                    .updateEmployeeInDepartmentPartiallyById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID, updateEmployee))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
     }
 
     @Nested
     class EmployeeServiceImplDeleteMethodsTest {
 
         @Test
-        void deleteEmployeeById_shouldCallRepository_whenEmployeeIsPresent() {
-            Employee employeeToDelete = EmployeeTestBuilder.anEmployee().build();
-            doReturn(Optional.of(employeeToDelete)).when(employeeRepository).findById(EMPLOYEE_ID);
+        void deleteEmployeeFromDepartmentById_shouldCallRepositories_whenCompanyAndDepartmentAndEmployeeArePresent() {
+            Employee employeeToDelete = EmployeeTestBuilder.anEmployee().withEmail(EMPLOYEE_EMAIL).build();
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(Optional.of(employeeToDelete)).when(employeeRepository)
+                    .findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
 
-            employeeService.deleteEmployeeById(EMPLOYEE_ID);
+            employeeService.deleteEmployeeFromDepartmentById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID);
 
-            verify(employeeRepository).findById(EMPLOYEE_ID);
+            verify(companyRepository).existsById(COMPANY_ID);
+            verify(employeeRepository).findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
             verify(employeeRepository).delete(employeeToDelete);
         }
 
         @Test
-        void deleteEmployeeById_shouldThrowEntityNotFoundException_whenEmployeeIsNotPresent() {
-            doReturn(Optional.empty()).when(employeeRepository).findById(EMPLOYEE_ID);
+        void deleteEmployeeFromDepartmentById_shouldThrowEntityNotFoundException_whenCompanyIsNotPresent() {
+            doReturn(false).when(companyRepository).existsById(COMPANY_ID);
 
-            assertThatThrownBy(() -> employeeService.deleteEmployeeById(EMPLOYEE_ID))
+            assertThatThrownBy(() -> employeeService
+                    .deleteEmployeeFromDepartmentById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
-    }
+        @Test
+        void deleteEmployeeFromDepartmentById_shouldThrowEntityNotFoundException_whenEmployeeIsNotPresent() {
+            doReturn(true).when(companyRepository).existsById(COMPANY_ID);
+            doReturn(Optional.empty()).when(employeeRepository)
+                    .findByDepartmentIdAndId(DEPARTMENT_ID, EMPLOYEE_ID);
 
+            assertThatThrownBy(() -> employeeService
+                    .deleteEmployeeFromDepartmentById(COMPANY_ID, DEPARTMENT_ID, EMPLOYEE_ID))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
 }
+
+
 
 

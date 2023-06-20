@@ -27,16 +27,23 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentMapper mapper = Mappers.getMapper(DepartmentMapper.class);
 
     @Override
-    public List<Department> findAllByPageable(Pageable pageable) {
-        return departmentRepository.findAll(pageable).getContent();
+    public List<Department> findAllByCompanyIdWithPagination(Long companyId, Pageable pageable) {
+        return departmentRepository.findAllByCompanyId(companyId, pageable);
+    }
+
+    @Override
+    public Department findByCompanyAndDepartmentId(Long companyId, Long departmentId) {
+        return departmentRepository.findByCompanyIdAndId(companyId, departmentId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        messagesSource.getMessage(DepartmentMessageKey.DEPARTMENT_NOT_FOUND_BY_ID, departmentId))
+                );
     }
 
     @Override
     public Department findById(Long departmentId) {
         return departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        messagesSource.getMessage(DepartmentMessageKey.DEPARTMENT_NOT_FOUND_BY_ID,
-                                departmentId)
+                        messagesSource.getMessage(DepartmentMessageKey.DEPARTMENT_NOT_FOUND_BY_ID, departmentId)
                 ));
     }
 
@@ -52,11 +59,10 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
-    public void updateDepartmentById(Long departmentId, Department updateDepartment) {
-        Department departmentToUpdate = departmentRepository.findById(departmentId)
+    public void updateDepartmentInCompanyById(Long companyId, Long departmentId, Department updateDepartment) {
+        Department departmentToUpdate = departmentRepository.findByCompanyIdAndId(companyId, departmentId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        messagesSource.getMessage(DepartmentMessageKey.DEPARTMENT_NOT_FOUND_BY_ID,
-                                departmentId)
+                        messagesSource.getMessage(DepartmentMessageKey.DEPARTMENT_NOT_FOUND_BY_ID, departmentId)
                 ));
         mapper.copyAllFields(departmentToUpdate, updateDepartment);
         departmentRepository.save(departmentToUpdate);
@@ -64,11 +70,11 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
-    public void updateDepartmentPartiallyById(Long departmentId, Department updateDepartment) {
-        Department departmentToUpdate = departmentRepository.findById(departmentId)
+    public void updateDepartmentInCompanyPartiallyById(
+            Long companyId, Long departmentId, Department updateDepartment) {
+        Department departmentToUpdate = departmentRepository.findByCompanyIdAndId(companyId, departmentId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        messagesSource.getMessage(DepartmentMessageKey.DEPARTMENT_NOT_FOUND_BY_ID,
-                                departmentId)
+                        messagesSource.getMessage(DepartmentMessageKey.DEPARTMENT_NOT_FOUND_BY_ID, departmentId)
                 ));
         mapper.copyNotNullFields(departmentToUpdate, updateDepartment);
         departmentRepository.save(departmentToUpdate);
@@ -76,8 +82,8 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
-    public void deleteDepartmentById(Long departmentId) {
-        Department departmentToDelete = departmentRepository.findById(departmentId)
+    public void deleteDepartmentFromCompanyById(Long companyId, Long departmentId) {
+        Department departmentToDelete = departmentRepository.findByCompanyIdAndId(companyId, departmentId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         messagesSource.getMessage(DepartmentMessageKey.DEPARTMENT_NOT_FOUND_BY_ID,
                                 departmentId)

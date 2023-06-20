@@ -7,16 +7,18 @@ import java.util.List;
 
 public interface DepartmentService {
 
-    List<Department> findAllByPageable(Pageable pageable);
+    List<Department> findAllByCompanyIdWithPagination(Long companyId, Pageable pageable);
+
+    Department findByCompanyAndDepartmentId(Long companyId, Long departmentId);
 
     Department findById(Long departmentId);
 
     Department createDepartmentInCompany(Department department, Long companyId);
 
-    void updateDepartmentById(Long departmentId, Department updateDepartment);
+    void updateDepartmentInCompanyById(Long companyId, Long departmentId, Department updateDepartment);
 
-    void updateDepartmentPartiallyById(Long departmentId, Department updateDepartment);
+    void updateDepartmentInCompanyPartiallyById(Long companyId, Long departmentId, Department updateDepartment);
 
-    void deleteDepartmentById(Long departmentId);
+    void  deleteDepartmentFromCompanyById(Long companyId, Long departmentId);
 
 }

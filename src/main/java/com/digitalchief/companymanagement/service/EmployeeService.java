@@ -6,15 +6,15 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface EmployeeService {
-    List<Employee> findAllByPageable(Pageable pageable);
+    List<Employee> findAllByCompanyAndDepartmentIdWithPagination(Long companyId, Long departmentId, Pageable pageable);
 
-    Employee findById(Long id);
+    Employee findByCompanyAndDepartmentAndEmployeeId(Long companyId, Long departmentId, Long employeeId);
 
-    Employee createEmployeeInDepartment(Employee employee, Long id);
+    Employee createEmployeeInDepartment(Employee employee, Long companyId, Long departmentId);
 
-    void updateEmployeeById(Long employeeId, Employee updateEmployee);
+    void updateEmployeeInDepartmentById(Long companyId, Long departmentId, Long employeeId, Employee updateEmployee);
 
-    void updateEmployeePartiallyById(Long employeeId, Employee updateEmployee);
+    void updateEmployeeInDepartmentPartiallyById(Long companyId, Long departmentId, Long employeeId, Employee updateEmployee);
 
-    void deleteEmployeeById(Long employeeId);
+    void deleteEmployeeFromDepartmentById(Long companyId, Long departmentId, Long employeeId);
 }
