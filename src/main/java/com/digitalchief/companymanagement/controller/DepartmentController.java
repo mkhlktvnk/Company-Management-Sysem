@@ -11,15 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -55,20 +47,23 @@ public class DepartmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toModel(createdDepartment));
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/companies/{companyId}/departments/{departmentId}")
     public void updateDepartmentByCompanyAndDepartmentId(@PathVariable Long companyId, @PathVariable Long departmentId,
                                                          @Valid @RequestBody DepartmentModel departmentModel) {
         departmentService.updateDepartmentInCompanyById(companyId, departmentId, mapper.toEntity(departmentModel));
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PatchMapping("/companies/{companyId}/departments/{departmentId}")
     public void updateDepartmentPartiallyByCompanyAndDepartmentId(
             @PathVariable Long companyId, @PathVariable Long departmentId,
-            @Valid @RequestBody DepartmentModel departmentModel) {
+            @RequestBody DepartmentModel departmentModel) {
         departmentService.updateDepartmentInCompanyPartiallyById(companyId, departmentId,
                 mapper.toEntity(departmentModel));
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/companies/{companyId}/departments/{departmentId}")
     public void deleteDepartmentByCompanyAndDepartmentId(@PathVariable Long companyId,
                                                          @PathVariable Long departmentId) {

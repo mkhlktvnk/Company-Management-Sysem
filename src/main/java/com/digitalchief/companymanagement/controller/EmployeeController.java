@@ -67,14 +67,16 @@ public class EmployeeController {
         employeeService.updateEmployeeInDepartmentById(companyId, departmentId, employeeId, employee);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PatchMapping("/companies/{companyId}/departments/{departmentId}/employees/{employeeId}")
     public void updateEmployeePartiallyById(@PathVariable Long companyId, @PathVariable Long departmentId,
                                             @PathVariable Long employeeId,
-                                            @Valid @RequestBody EmployeeModel employeeModel) {
+                                            @RequestBody EmployeeModel employeeModel) {
         Employee employee = mapper.toEntity(employeeModel);
         employeeService.updateEmployeeInDepartmentPartiallyById(companyId, departmentId, employeeId, employee);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/companies/{companyId}/departments/{departmentId}/employees/{employeeId}")
     public void deleteEmployeeById(@PathVariable Long companyId, @PathVariable Long departmentId,
                                    @PathVariable Long employeeId) {

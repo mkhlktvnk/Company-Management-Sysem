@@ -49,7 +49,7 @@ public class CompanyController {
     public ResponseEntity<CompanyModel> createCompany(@Valid @RequestBody CompanyModel companyModel) {
         Company createdCompany = companyService.createCompany(mapper.toEntity(companyModel));
 
-        return ResponseEntity.ok(mapper.toModel(createdCompany));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toModel(createdCompany));
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -61,8 +61,7 @@ public class CompanyController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PatchMapping("/companies/{companyId}")
-    public void updateCompanyPartiallyById(@PathVariable Long companyId,
-                                                      @Valid @RequestBody CompanyModel companyModel) {
+    public void updateCompanyPartiallyById(@PathVariable Long companyId, @RequestBody CompanyModel companyModel) {
         Company updateCompany = mapper.toEntity(companyModel);
         companyService.updateCompanyPartiallyById(companyId, updateCompany);
     }
