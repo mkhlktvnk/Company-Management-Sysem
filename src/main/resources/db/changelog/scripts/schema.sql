@@ -4,7 +4,7 @@ CREATE TABLE companies
     name                VARCHAR UNIQUE NOT NULL,
     description         VARCHAR        NOT NULL,
     date_of_creation    DATE           NOT NULL,
-    number_of_employees BIGINT         NOT NULL
+    number_of_employees BIGINT DEFAULT 0
 );
 
 CREATE TABLE departments
