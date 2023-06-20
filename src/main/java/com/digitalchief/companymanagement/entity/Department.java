@@ -1,16 +1,6 @@
 package com.digitalchief.companymanagement.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,8 +11,8 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "departments")
 @NoArgsConstructor
+@Table(name = "departments", indexes = { @Index(name = "idx_department_id", columnList = "id") })
 public class Department {
 
     @Id
