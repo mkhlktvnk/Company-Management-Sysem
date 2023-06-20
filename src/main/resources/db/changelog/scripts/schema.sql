@@ -28,3 +28,7 @@ CREATE TABLE employees
     salary_per_month   NUMERIC(19, 2) NOT NULL,
     department_id      BIGINT REFERENCES departments (id)
 );
+
+CREATE INDEX idx_company_id ON companies (id);
+CREATE INDEX idx_department_id ON departments (id);
+CREATE INDEX idx_employee_id ON employees (id);
