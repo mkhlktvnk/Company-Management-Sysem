@@ -1,9 +1,26 @@
 services:
+  application:
+    container_name: application
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+    depends_on:
+      - postgres
+
   postgres:
     image: 'postgres:13.3'
+    hostname: postgres
     environment:
-      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_DB=company-management'
       - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_USER=user'
     ports:
       - "5432:5432"
+    networks:
+      - backend
+
+networks:
+  backend:
